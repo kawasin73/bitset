@@ -14,8 +14,8 @@ const (
 
 // errors
 var (
-	ErrInvalidByteOrder = errors.New("unsupported byte order")
-	ErrUnsupportedArch  = errors.New("unsupported host byte order")
+	ErrInvalidEndianness = errors.New("unsupported endianness")
+	ErrUnsupportedArch   = errors.New("unsupported host endianness")
 )
 
 // BitVec is bit vector component
@@ -25,9 +25,9 @@ type BitVec struct {
 }
 
 // New create *BitVec
-func New(b []byte, endian ByteOrder) (*BitVec, error) {
+func New(b []byte, endian Endianness) (*BitVec, error) {
 	if endian != LittleEndian && endian != BigEndian {
-		return nil, ErrInvalidByteOrder
+		return nil, ErrInvalidEndianness
 	} else if hostEndian != LittleEndian && hostEndian != BigEndian {
 		return nil, ErrUnsupportedArch
 	}

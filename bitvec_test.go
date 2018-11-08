@@ -5,13 +5,13 @@ import (
 )
 
 var (
-	endians = []ByteOrder{LittleEndian, BigEndian}
+	endians = []Endianness{LittleEndian, BigEndian}
 )
 
 func TestNew(t *testing.T) {
 	tests := map[string]struct {
 		size   int
-		endian ByteOrder
+		endian Endianness
 		err    error
 	}{
 		"should create length : 0":    {size: 0, endian: LittleEndian, err: nil},
@@ -19,8 +19,8 @@ func TestNew(t *testing.T) {
 		"should create length : 1024": {size: 8 * 1024, endian: LittleEndian, err: nil},
 		"should create length : 12":   {size: 100, endian: LittleEndian, err: nil},
 		"should be big endian":        {size: 100, endian: BigEndian, err: nil},
-		"unsupported endian unknown":  {size: 1024, endian: unknown, err: ErrInvalidByteOrder},
-		"unsupported endian 100":      {size: 1024, endian: 100, err: ErrInvalidByteOrder},
+		"unsupported endian unknown":  {size: 1024, endian: unknown, err: ErrInvalidEndianness},
+		"unsupported endian 100":      {size: 1024, endian: 100, err: ErrInvalidEndianness},
 	}
 
 	for name, v := range tests {

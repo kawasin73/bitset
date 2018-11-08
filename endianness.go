@@ -5,28 +5,28 @@ import (
 	"unsafe"
 )
 
-// ByteOrder is LittleEndian or BigEndian
-type ByteOrder uint8
+// Endianness is LittleEndian or BigEndian
+type Endianness uint8
 
-func (bo ByteOrder) String() string {
-	switch bo {
+func (e Endianness) String() string {
+	switch e {
 	case LittleEndian:
 		return "little endian"
 	case BigEndian:
 		return "big endian"
 	default:
-		return fmt.Sprintf("unknown endian(%d)", bo)
+		return fmt.Sprintf("unknown endian(%d)", e)
 	}
 }
 
 // Use LittleEndian or BigEndian for BitVec initialization
 const (
-	unknown ByteOrder = iota
+	unknown Endianness = iota
 	LittleEndian
 	BigEndian
 )
 
-var hostEndian ByteOrder
+var hostEndian Endianness
 
 func init() {
 	var x uint64 = 0x0011223344556677
