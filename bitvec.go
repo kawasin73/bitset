@@ -2,6 +2,7 @@ package zcbit
 
 import (
 	"errors"
+	"math/bits"
 	"reflect"
 	"unsafe"
 )
@@ -17,6 +18,17 @@ var (
 	ErrInvalidEndianness = errors.New("unsupported endianness")
 	ErrUnsupportedArch   = errors.New("unsupported host endianness")
 )
+
+func swapUint64(n uint64) uint64 {
+	return ((n & 0x00000000000000FF) << 56) |
+		((n & 0x000000000000FF00) << 40) |
+		((n & 0x0000000000FF0000) << 24) |
+		((n & 0x00000000FF000000) << 8) |
+		((n & 0x000000FF00000000) >> 8) |
+		((n & 0x0000FF0000000000) >> 24) |
+		((n & 0x00FF000000000000) >> 40) |
+		((n & 0xFF00000000000000) >> 56)
+}
 
 // BitVec is bit vector component
 type BitVec struct {
@@ -87,13 +99,38 @@ func (b *BitVec) Clear(i uint) bool {
 	return true
 }
 
-func swapUint64(n uint64) uint64 {
-	return ((n & 0x00000000000000FF) << 56) |
-		((n & 0x000000000000FF00) << 40) |
-		((n & 0x0000000000FF0000) << 24) |
-		((n & 0x00000000FF000000) << 8) |
-		((n & 0x000000FF00000000) >> 8) |
-		((n & 0x0000FF0000000000) >> 24) |
-		((n & 0x00FF000000000000) >> 40) |
-		((n & 0xFF00000000000000) >> 56)
+// FindFirstOne returns first 1 bit index and true.
+// if not found then returns false
+func (b *BitVec) FindFirstOne(i uint) (uint, bool) {
+	idx := int(i >> log2WordSize)
+	if idx >= len(b.vec) {
+		return 0, false
+	}
+	if b.swap {
+		v := swapUint64(b.vec[idx])
+		v = v >> (i & (wordSize - 1))
+		if v != 0 {
+			return i + uint(bits.TrailingZeros64(v)), true
+		}
+		idx++
+		for idx < len(b.vec) {
+			if b.vec[idx] != 0 {
+				return uint(idx)*wordSize + uint(bits.TrailingZeros64(swapUint64(b.vec[idx]))), true
+			}
+			idx++
+		}
+	} else {
+		v := b.vec[idx] >> (i & (wordSize - 1))
+		if v != 0 {
+			return i + uint(bits.TrailingZeros64(v)), true
+		}
+		idx++
+		for idx < len(b.vec) {
+			if b.vec[idx] != 0 {
+				return uint(idx)*wordSize + uint(bits.TrailingZeros64(b.vec[idx])), true
+			}
+			idx++
+		}
+	}
+	return 0, false
 }

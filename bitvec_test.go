@@ -138,7 +138,7 @@ func TestBitVec_Test(t *testing.T) {
 	for _, endian := range endians {
 		t.Run(endian.String(), func(t *testing.T) {
 			buf := make([]byte, 8*3)
-			b, err := New(buf, LittleEndian)
+			b, err := New(buf, endian)
 			if err != nil {
 				t.Fatalf("failed to create bit vec %v", err)
 			}
@@ -158,6 +158,53 @@ func TestBitVec_Test(t *testing.T) {
 					t.Errorf("unexpectedly successed to test %v", v)
 				}
 			}
+		})
+	}
+}
+
+func TestBitVec_FindFirstOne(t *testing.T) {
+	for _, endian := range endians {
+		t.Run(endian.String(), func(t *testing.T) {
+			t.Run("success to find", func(t *testing.T) {
+				buf := make([]byte, 8*3)
+				b, err := New(buf, endian)
+				if err != nil {
+					t.Fatalf("failed to create bit vec %v", err)
+				}
+				arr := []uint{0, 1, 3, 6, 10, 64, 127}
+				for _, v := range arr {
+					if !b.Set(v) {
+						t.Errorf("failed to set %v", v)
+					}
+				}
+				var (
+					v uint
+				)
+				for _, expected := range arr {
+					result, ok := b.FindFirstOne(v)
+					if !ok {
+						t.Errorf("failed to find v : %v, result : %v", v, result)
+					}
+					if result != expected {
+						t.Errorf("found value does not match v : %v, result : %v, expected : %v", v, result, expected)
+					}
+					v = result + 1
+				}
+				if result, ok := b.FindFirstOne(v); ok {
+					t.Errorf("unexpectedly found value  v : %v, result : %v", v, result)
+				}
+			})
+
+			t.Run("all bit is 0", func(t *testing.T) {
+				buf := make([]byte, 8*3)
+				b, err := New(buf, endian)
+				if err != nil {
+					t.Fatalf("failed to create bit vec %v", err)
+				}
+				if result, ok := b.FindFirstOne(0); ok {
+					t.Errorf("unexpectedly found value result : %v", result)
+				}
+			})
 		})
 	}
 }
