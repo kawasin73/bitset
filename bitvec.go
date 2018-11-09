@@ -170,3 +170,25 @@ func (b *BitVec) FindFirstZero(i uint) (uint, bool) {
 	}
 	return 0, false
 }
+
+// FindLastOne returns last 1 bit index and true.
+// if not found then returns false
+func (b *BitVec) FindLastOne() (uint, bool) {
+	if b.swap {
+		for i := len(b.vec); i > 0; i-- {
+			v := b.vec[i-1]
+			if v != 0 {
+				v = swapUint64(v)
+				return uint(i*wordSize - bits.LeadingZeros64(v) - 1), true
+			}
+		}
+	} else {
+		for i := len(b.vec); i > 0; i-- {
+			v := b.vec[i-1]
+			if v != 0 {
+				return uint(i*wordSize - bits.LeadingZeros64(v) - 1), true
+			}
+		}
+	}
+	return 0, false
+}

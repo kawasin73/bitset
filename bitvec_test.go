@@ -265,3 +265,54 @@ func TestBitVec_FindFirstZero(t *testing.T) {
 		})
 	}
 }
+
+func TestBitVec_FindLastOne(t *testing.T) {
+	for _, endian := range endians {
+		t.Run(endian.String(), func(t *testing.T) {
+			t.Run("success to find", func(t *testing.T) {
+				buf := make([]byte, 8*3)
+				b, err := New(buf, endian)
+				if err != nil {
+					t.Fatalf("failed to create bit vec %v", err)
+				}
+
+				tests := []struct {
+					result uint
+					ok     bool
+					set    []uint
+				}{
+					{result: 0, ok: true, set: []uint{0}},
+					{result: 1, ok: true, set: []uint{0, 1}},
+					{result: 1, ok: true, set: []uint{1}},
+					{result: 8, ok: true, set: []uint{0, 8}},
+					{ok: false, set: []uint{}},
+				}
+
+				for _, test := range tests {
+					for _, v := range test.set {
+						if !b.Set(v) {
+							t.Errorf("failed to set %v", v)
+						}
+					}
+
+					result, ok := b.FindLastOne()
+					if ok != test.ok {
+						if ok {
+							t.Errorf("unexpectedly found last one at %v for %v", result, test.set)
+						} else {
+							t.Errorf("not found last one for %v", test.set)
+						}
+					} else if result != test.result {
+						t.Errorf("last one index %v, expected %v for %v", result, test.result, test.set)
+					}
+
+					for _, v := range test.set {
+						if !b.Clear(v) {
+							t.Errorf("failed to clear %v", v)
+						}
+					}
+				}
+			})
+		})
+	}
+}
