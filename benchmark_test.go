@@ -1,4 +1,4 @@
-package zcbit
+package bibit
 
 import (
 	"math/rand"

@@ -1,4 +1,4 @@
-# Zero Copy BIT vector (zcbit)
+# Bi-Endian BIT vector (bibit)
 
 ## LICENSE
 
