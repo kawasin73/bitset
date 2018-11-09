@@ -8,9 +8,10 @@ import (
 )
 
 const (
-	wordBytes    = 8
-	wordSize     = 64
-	log2WordSize = 6
+	wordBytes           = 8
+	wordSize            = 64
+	log2WordSize        = 6
+	allBits      uint64 = 0xffffffffffffffff
 )
 
 // errors
@@ -112,24 +113,56 @@ func (b *BitVec) FindFirstOne(i uint) (uint, bool) {
 		if v != 0 {
 			return i + uint(bits.TrailingZeros64(v)), true
 		}
-		idx++
-		for idx < len(b.vec) {
+		for idx++; idx < len(b.vec); idx++ {
 			if b.vec[idx] != 0 {
 				return uint(idx)*wordSize + uint(bits.TrailingZeros64(swapUint64(b.vec[idx]))), true
 			}
-			idx++
 		}
 	} else {
 		v := b.vec[idx] >> (i & (wordSize - 1))
 		if v != 0 {
 			return i + uint(bits.TrailingZeros64(v)), true
 		}
-		idx++
-		for idx < len(b.vec) {
+		for idx++; idx < len(b.vec); idx++ {
 			if b.vec[idx] != 0 {
 				return uint(idx)*wordSize + uint(bits.TrailingZeros64(b.vec[idx])), true
 			}
-			idx++
+		}
+	}
+	return 0, false
+}
+
+// FindFirstZero returns first 0 bit index and true.
+// if not found then returns false
+// TODO: set tail
+func (b *BitVec) FindFirstZero(i uint) (uint, bool) {
+	idx := int(i >> log2WordSize)
+	if idx >= len(b.vec) {
+		return 0, false
+	}
+	if b.swap {
+		offset := (i & (wordSize - 1))
+		v := swapUint64(b.vec[idx]) >> offset
+		trail := uint(bits.TrailingZeros64(^v))
+		if trail < wordSize-offset {
+			return i + trail, true
+		}
+		for idx++; idx < len(b.vec); idx++ {
+			if b.vec[idx] != allBits {
+				return uint(idx)*wordSize + uint(bits.TrailingZeros64(^swapUint64(b.vec[idx]))), true
+			}
+		}
+	} else {
+		offset := (i & (wordSize - 1))
+		v := b.vec[idx] >> offset
+		trail := uint(bits.TrailingZeros64(^v))
+		if trail < wordSize-offset {
+			return i + trail, true
+		}
+		for idx++; idx < len(b.vec); idx++ {
+			if b.vec[idx] != allBits {
+				return uint(idx)*wordSize + uint(bits.TrailingZeros64(^b.vec[idx])), true
+			}
 		}
 	}
 	return 0, false
