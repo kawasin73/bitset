@@ -14,13 +14,13 @@ func TestNew(t *testing.T) {
 		endian Endianness
 		err    error
 	}{
-		"should create length : 0":    {size: 0, endian: LittleEndian, err: nil},
-		"should create length : 1":    {size: 8, endian: LittleEndian, err: nil},
-		"should create length : 1024": {size: 8 * 1024, endian: LittleEndian, err: nil},
-		"should create length : 12":   {size: 100, endian: LittleEndian, err: nil},
-		"should be big endian":        {size: 100, endian: BigEndian, err: nil},
-		"unsupported endian unknown":  {size: 1024, endian: unknown, err: ErrInvalidEndianness},
-		"unsupported endian 100":      {size: 1024, endian: 100, err: ErrInvalidEndianness},
+		"should create length : 0":             {size: 0, endian: LittleEndian, err: nil},
+		"should create length : 1":             {size: 8, endian: LittleEndian, err: nil},
+		"should create length : 1024":          {size: 8 * 1024, endian: LittleEndian, err: nil},
+		"should be big endian":                 {size: 8 * 1024, endian: BigEndian, err: nil},
+		"length of buffer must be N * 8 bytes": {size: 100, endian: LittleEndian, err: ErrInvalidLength},
+		"unsupported endian unknown":           {size: 1024, endian: unknown, err: ErrInvalidEndianness},
+		"unsupported endian 100":               {size: 1024, endian: 100, err: ErrInvalidEndianness},
 	}
 
 	for name, v := range tests {

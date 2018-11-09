@@ -17,6 +17,7 @@ const (
 // errors
 var (
 	ErrInvalidEndianness = errors.New("unsupported endianness")
+	ErrInvalidLength     = errors.New("len(buffer) for zcbit must be N * 8")
 	ErrUnsupportedArch   = errors.New("unsupported host endianness")
 )
 
@@ -39,7 +40,9 @@ type BitVec struct {
 
 // New create *BitVec
 func New(b []byte, endian Endianness) (*BitVec, error) {
-	if endian != LittleEndian && endian != BigEndian {
+	if len(b)%8 != 0 {
+		return nil, ErrInvalidLength
+	} else if endian != LittleEndian && endian != BigEndian {
 		return nil, ErrInvalidEndianness
 	} else if hostEndian != LittleEndian && hostEndian != BigEndian {
 		return nil, ErrUnsupportedArch
