@@ -1,4 +1,4 @@
-package bibit
+package bitset
 
 import "testing"
 

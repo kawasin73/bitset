@@ -1,4 +1,4 @@
-package bibit
+package bitset
 
 import (
 	"testing"
@@ -31,8 +31,8 @@ func TestNew(t *testing.T) {
 	}
 }
 
-func TestBitVec_Set_Clear(t *testing.T) {
-	t.Run("set and clear in LittleEndian", func(t *testing.T) {
+func TestBitVec_Set_Unset(t *testing.T) {
+	t.Run("set and unset in LittleEndian", func(t *testing.T) {
 		buf := make([]byte, 8*10)
 		b, err := New(buf, LittleEndian)
 		if err != nil {
@@ -55,8 +55,8 @@ func TestBitVec_Set_Clear(t *testing.T) {
 			}
 		}
 		for _, v := range arr[1:] {
-			if !b.Clear(v) {
-				t.Errorf("failed to clear %v", v)
+			if !b.Unset(v) {
+				t.Errorf("failed to unset %v", v)
 			}
 		}
 		buf3 := []byte{
@@ -66,12 +66,12 @@ func TestBitVec_Set_Clear(t *testing.T) {
 		}
 		for i, v := range buf3 {
 			if buf[i] != v {
-				t.Errorf("clear not match i : %v, v : %v, expected %v", i, buf[i], v)
+				t.Errorf("unset not match i : %v, v : %v, expected %v", i, buf[i], v)
 			}
 		}
 	})
 
-	t.Run("set and clear in BigEndian", func(t *testing.T) {
+	t.Run("set and unset in BigEndian", func(t *testing.T) {
 		buf := make([]byte, 8*10)
 		b, err := New(buf, BigEndian)
 		if err != nil {
@@ -94,8 +94,8 @@ func TestBitVec_Set_Clear(t *testing.T) {
 			}
 		}
 		for _, v := range arr[1:] {
-			if !b.Clear(v) {
-				t.Errorf("failed to clear %v", v)
+			if !b.Unset(v) {
+				t.Errorf("failed to unset %v", v)
 			}
 		}
 		buf3 := []byte{
@@ -105,7 +105,7 @@ func TestBitVec_Set_Clear(t *testing.T) {
 		}
 		for i, v := range buf3 {
 			if buf[i] != v {
-				t.Errorf("clear not match i : %v, v : %v, expected %v", i, buf[i], v)
+				t.Errorf("unset not match i : %v, v : %v, expected %v", i, buf[i], v)
 			}
 		}
 	})
@@ -123,18 +123,18 @@ func TestBitVec_Set_Clear(t *testing.T) {
 			if b.Set(16 * 8) {
 				t.Errorf("invalid to success to set next to the last bit")
 			}
-			if !b.Clear(16*8 - 1) {
-				t.Errorf("failed to clear last bit")
+			if !b.Unset(16*8 - 1) {
+				t.Errorf("failed to unset last bit")
 			}
-			if b.Clear(16 * 8) {
-				t.Errorf("invalid to success to clear next to the last bit")
+			if b.Unset(16 * 8) {
+				t.Errorf("invalid to success to unset next to the last bit")
 			}
 		})
 	}
 
 }
 
-func TestBitVec_Test(t *testing.T) {
+func TestBitVec_Get(t *testing.T) {
 	for _, endian := range endians {
 		t.Run(endian.String(), func(t *testing.T) {
 			buf := make([]byte, 8*3)
@@ -149,12 +149,12 @@ func TestBitVec_Test(t *testing.T) {
 				}
 			}
 			for _, v := range arr {
-				if !b.Test(v) {
+				if !b.Get(v) {
 					t.Errorf("failed to test %v not found", v)
 				}
 			}
 			for _, v := range []uint{2, 4, 5, 7, 8, 100, 8*3*8 - 1, 8 * 3 * 8} {
-				if b.Test(v) {
+				if b.Get(v) {
 					t.Errorf("unexpectedly successed to test %v", v)
 				}
 			}
@@ -225,8 +225,8 @@ func TestBitVec_FindFirstZero(t *testing.T) {
 				}
 				arr := []uint{0, 1, 3, 6, 10, 64, 127}
 				for _, v := range arr {
-					if !b.Clear(v) {
-						t.Errorf("failed to clear %v", v)
+					if !b.Unset(v) {
+						t.Errorf("failed to unset %v", v)
 					}
 				}
 				var (
@@ -307,8 +307,8 @@ func TestBitVec_FindLastOne(t *testing.T) {
 					}
 
 					for _, v := range test.set {
-						if !b.Clear(v) {
-							t.Errorf("failed to clear %v", v)
+						if !b.Unset(v) {
+							t.Errorf("failed to unset %v", v)
 						}
 					}
 				}

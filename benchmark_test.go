@@ -1,4 +1,4 @@
-package bibit
+package bitset
 
 import (
 	"math/rand"
@@ -40,34 +40,34 @@ func benchmarkBitVecSet(b *testing.B, endian Endianness) {
 	}
 }
 
-func BenchmarkBitVec_Clear_LittleEndian(b *testing.B) {
-	benchmarkBitVecClear(b, LittleEndian)
+func BenchmarkBitVec_Unset_LittleEndian(b *testing.B) {
+	benchmarkBitVecUnset(b, LittleEndian)
 }
 
-func BenchmarkBitVec_Clear_BigEndian(b *testing.B) {
-	benchmarkBitVecClear(b, BigEndian)
+func BenchmarkBitVec_Unset_BigEndian(b *testing.B) {
+	benchmarkBitVecUnset(b, BigEndian)
 }
 
-func benchmarkBitVecClear(b *testing.B, endian Endianness) {
+func benchmarkBitVecUnset(b *testing.B, endian Endianness) {
 	buf := make([]byte, randomSize/8)
 	bv, err := New(buf, endian)
 	if err != nil {
 		b.Fatal(err)
 	}
 	for i := 0; i < b.N; i++ {
-		bv.Clear(randomSet[i%randomSize])
+		bv.Unset(randomSet[i%randomSize])
 	}
 }
 
-func BenchmarkBitVec_Test_LittleEndian(b *testing.B) {
-	benchmarkBitVecTest(b, LittleEndian)
+func BenchmarkBitVec_Get_LittleEndian(b *testing.B) {
+	benchmarkBitVecGet(b, LittleEndian)
 }
 
-func BenchmarkBitVec_Test_BigEndian(b *testing.B) {
-	benchmarkBitVecTest(b, BigEndian)
+func BenchmarkBitVec_Get_BigEndian(b *testing.B) {
+	benchmarkBitVecGet(b, BigEndian)
 }
 
-func benchmarkBitVecTest(b *testing.B, endian Endianness) {
+func benchmarkBitVecGet(b *testing.B, endian Endianness) {
 	buf := make([]byte, randomSize/8)
 	bv, err := New(buf, endian)
 	if err != nil {
@@ -78,7 +78,7 @@ func benchmarkBitVecTest(b *testing.B, endian Endianness) {
 	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		bv.Test(randomSet[i%randomSize])
+		bv.Get(randomSet[i%randomSize])
 	}
 }
 

@@ -1,6 +1,6 @@
-# BI-endian BIT vector (bibit)
+# Bi-endian BitSet
 
-bibit is Bit Vector (Array) library supporting both Big Endian and Little Endian for Golang.
+bitset is Bit Vector (Array) library supporting both Big Endian and Little Endian for Golang.
 
 [日本語の README](./README.ja.md) はこちら
 
@@ -14,14 +14,14 @@ TODO
 func main() {
 	// in memory usage
 	buf := make([]byte, 2*8)
-	b, _ := bibit.New(buf, bibit.LittleEndian)
+	b, _ := bitset.New(buf, bitset.LittleEndian)
 	for _, v := range []uint{0, 1, 3, 6, 10, 64, 127, 128} {
 		b.Set(v) // when v == 128 returns false because overflow
 	}
 	fmt.Println(buf) // [75 4 0 0 0 0 0 0 1 0 0 0 0 0 0 128]
 
-	b.Clear(127)
-	fmt.Println(b.Test(127)) // false
+	b.Unset(127)
+	fmt.Println(b.Get(127)) // false
 
 	for v, ok := b.FindFirstOne(0); ok; v, ok = b.FindFirstOne(v + 1) {
 		fmt.Println(v) // 0 1 3 6 10 64
@@ -40,7 +40,7 @@ func main() {
 		f.Close()
 	}()
 
-	b, _ = bibit.New(buf, bibit.BigEndian)
+	b, _ = bitset.New(buf, bitset.BigEndian)
 	for v, ok := b.FindFirstOne(0); ok; v, ok = b.FindFirstOne(v + 1) {
 		fmt.Println(v) // 0 1 3 6 10 64  if executed twice
 	}
@@ -54,7 +54,7 @@ func main() {
 ## Installation
 
 ```bash
-go get github.com/kawasin73/bibit
+go get github.com/kawasin73/bitset
 ```
 
 ## Notices

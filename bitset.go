@@ -1,4 +1,4 @@
-package bibit
+package bitset
 
 import (
 	"errors"
@@ -9,7 +9,7 @@ import (
 
 const (
 	wordBytes           = 8
-	wordSize            = 64
+	wordBits            = 64
 	log2WordSize        = 6
 	allBits      uint64 = 0xffffffffffffffff
 )
@@ -32,14 +32,14 @@ func swapUint64(n uint64) uint64 {
 		((n & 0xFF00000000000000) >> 56)
 }
 
-// BitVec is bit vector component
-type BitVec struct {
+// BitSet is bit vector component
+type BitSet struct {
 	vec  []uint64
 	swap bool
 }
 
-// New create *BitVec
-func New(b []byte, endian Endianness) (*BitVec, error) {
+// New create *BitSet
+func New(b []byte, endian Endianness) (*BitSet, error) {
 	if len(b)%8 != 0 {
 		return nil, ErrInvalidLength
 	} else if endian != LittleEndian && endian != BigEndian {
@@ -51,84 +51,84 @@ func New(b []byte, endian Endianness) (*BitVec, error) {
 	header.Len /= wordBytes
 	header.Cap /= wordBytes
 
-	return &BitVec{
+	return &BitSet{
 		vec:  *(*[]uint64)(unsafe.Pointer(&header)),
 		swap: endian != hostEndian,
 	}, nil
 }
 
-// Test checks the bit is set.
-func (b *BitVec) Test(i uint) bool {
+// Get checks the bit is set.
+func (b *BitSet) Get(i uint) bool {
 	idx := i >> log2WordSize
 	if int(idx) >= len(b.vec) {
 		return false
 	}
 	if b.swap {
 		v := swapUint64(b.vec[idx])
-		return v&(1<<(i&(wordSize-1))) != 0
+		return v&(1<<(i&(wordBits-1))) != 0
 	} else {
-		return b.vec[idx]&(1<<(i&(wordSize-1))) != 0
+		return b.vec[idx]&(1<<(i&(wordBits-1))) != 0
 	}
 }
 
 // Set sets 1 to bit
-func (b *BitVec) Set(i uint) bool {
+func (b *BitSet) Set(i uint) bool {
 	idx := i >> log2WordSize
 	if int(idx) >= len(b.vec) {
 		return false
 	}
 	if b.swap {
 		v := swapUint64(b.vec[idx])
-		v |= 1 << (i & (wordSize - 1))
+		v |= 1 << (i & (wordBits - 1))
 		b.vec[idx] = swapUint64(v)
 	} else {
-		b.vec[idx] |= 1 << (i & (wordSize - 1))
+		b.vec[idx] |= 1 << (i & (wordBits - 1))
 	}
 	return true
 }
 
-// Clear sets 0 to bit
-func (b *BitVec) Clear(i uint) bool {
+// Unset sets 0 to bit
+func (b *BitSet) Unset(i uint) bool {
 	idx := i >> log2WordSize
 	if int(idx) >= len(b.vec) {
 		return false
 	}
 	if b.swap {
 		v := swapUint64(b.vec[idx])
-		v &^= 1 << (i & (wordSize - 1))
+		v &^= 1 << (i & (wordBits - 1))
 		b.vec[idx] = swapUint64(v)
 	} else {
-		b.vec[idx] &^= 1 << (i & (wordSize - 1))
+		b.vec[idx] &^= 1 << (i & (wordBits - 1))
 	}
 	return true
 }
 
 // FindFirstOne returns first 1 bit index and true.
 // if not found then returns false
-func (b *BitVec) FindFirstOne(i uint) (uint, bool) {
+func (b *BitSet) FindFirstOne(i uint) (uint, bool) {
 	idx := int(i >> log2WordSize)
 	if idx >= len(b.vec) {
 		return 0, false
 	}
 	if b.swap {
 		v := swapUint64(b.vec[idx])
-		v = v >> (i & (wordSize - 1))
+		v = v >> (i & (wordBits - 1))
 		if v != 0 {
 			return i + uint(bits.TrailingZeros64(v)), true
 		}
 		for idx++; idx < len(b.vec); idx++ {
 			if b.vec[idx] != 0 {
-				return uint(idx)*wordSize + uint(bits.TrailingZeros64(swapUint64(b.vec[idx]))), true
+				return uint(idx)*wordBits + uint(bits.TrailingZeros64(swapUint64(b.vec[idx]))), true
 			}
 		}
 	} else {
-		v := b.vec[idx] >> (i & (wordSize - 1))
+		v := b.vec[idx] >> (i & (wordBits - 1))
 		if v != 0 {
 			return i + uint(bits.TrailingZeros64(v)), true
 		}
 		for idx++; idx < len(b.vec); idx++ {
 			if b.vec[idx] != 0 {
-				return uint(idx)*wordSize + uint(bits.TrailingZeros64(b.vec[idx])), true
+				return uint(idx)*wordBits + uint(bits.TrailingZeros64(b.vec[idx])), true
 			}
 		}
 	}
@@ -138,33 +138,33 @@ func (b *BitVec) FindFirstOne(i uint) (uint, bool) {
 // FindFirstZero returns first 0 bit index and true.
 // if not found then returns false
 // TODO: set tail
-func (b *BitVec) FindFirstZero(i uint) (uint, bool) {
+func (b *BitSet) FindFirstZero(i uint) (uint, bool) {
 	idx := int(i >> log2WordSize)
 	if idx >= len(b.vec) {
 		return 0, false
 	}
 	if b.swap {
-		offset := (i & (wordSize - 1))
+		offset := (i & (wordBits - 1))
 		v := swapUint64(b.vec[idx]) >> offset
 		trail := uint(bits.TrailingZeros64(^v))
-		if trail < wordSize-offset {
+		if trail < wordBits-offset {
 			return i + trail, true
 		}
 		for idx++; idx < len(b.vec); idx++ {
 			if b.vec[idx] != allBits {
-				return uint(idx)*wordSize + uint(bits.TrailingZeros64(^swapUint64(b.vec[idx]))), true
+				return uint(idx)*wordBits + uint(bits.TrailingZeros64(^swapUint64(b.vec[idx]))), true
 			}
 		}
 	} else {
-		offset := (i & (wordSize - 1))
+		offset := (i & (wordBits - 1))
 		v := b.vec[idx] >> offset
 		trail := uint(bits.TrailingZeros64(^v))
-		if trail < wordSize-offset {
+		if trail < wordBits-offset {
 			return i + trail, true
 		}
 		for idx++; idx < len(b.vec); idx++ {
 			if b.vec[idx] != allBits {
-				return uint(idx)*wordSize + uint(bits.TrailingZeros64(^b.vec[idx])), true
+				return uint(idx)*wordBits + uint(bits.TrailingZeros64(^b.vec[idx])), true
 			}
 		}
 	}
@@ -173,20 +173,20 @@ func (b *BitVec) FindFirstZero(i uint) (uint, bool) {
 
 // FindLastOne returns last 1 bit index and true.
 // if not found then returns false
-func (b *BitVec) FindLastOne() (uint, bool) {
+func (b *BitSet) FindLastOne() (uint, bool) {
 	if b.swap {
 		for i := len(b.vec); i > 0; i-- {
 			v := b.vec[i-1]
 			if v != 0 {
 				v = swapUint64(v)
-				return uint(i*wordSize - bits.LeadingZeros64(v) - 1), true
+				return uint(i*wordBits - bits.LeadingZeros64(v) - 1), true
 			}
 		}
 	} else {
 		for i := len(b.vec); i > 0; i-- {
 			v := b.vec[i-1]
 			if v != 0 {
-				return uint(i*wordSize - bits.LeadingZeros64(v) - 1), true
+				return uint(i*wordBits - bits.LeadingZeros64(v) - 1), true
 			}
 		}
 	}

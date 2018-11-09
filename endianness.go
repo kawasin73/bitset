@@ -1,4 +1,4 @@
-package bibit
+package bitset
 
 import (
 	"fmt"
@@ -19,7 +19,7 @@ func (e Endianness) String() string {
 	}
 }
 
-// Use LittleEndian or BigEndian for BitVec initialization
+// Use LittleEndian or BigEndian for BitSet initialization
 const (
 	unknown Endianness = iota
 	LittleEndian
