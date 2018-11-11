@@ -1,4 +1,4 @@
-# Bi-endian Bit Vector
+# Bi-endianess Bit Vector
 
 bitset は、ビッグエンディアン、リトルエンディアンの両方に対応したビットベクトルのGo言語で実装されたライブラリです。
 
