@@ -40,3 +40,8 @@ func init() {
 		hostEndian = unknown
 	}
 }
+
+// HostEndian returns the endianness of machine.
+func HostEndian() Endianness {
+	return hostEndian
+}
