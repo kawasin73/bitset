@@ -2,7 +2,10 @@ language: go
 
 os:
   - linux
-  - osx
+
+before_install:
+  - wget https://github.com/multiarch/qemu-user-static/releases/download/v3.0.0/qemu-ppc64-static
+  - chmod 755 qemu-ppc64-static
 
 go:
   - "1.11"
@@ -10,4 +13,6 @@ go:
   - "1.9"
 
 script:
+  - GOOS=linux GOARCH=ppc64 go test -c -o bitset.test
   - go test ./... -v
+  - ./qemu-ppc64-static ./bitset.test -test.v
