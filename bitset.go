@@ -11,6 +11,8 @@ const (
 	wordBytes           = 8
 	wordBits            = 64
 	log2WordSize        = 6
+	mask00111000        = 0x0000000000000038
+	mask00000111        = 0x0000000000000007
 	allBits      uint64 = 0xffffffffffffffff
 )
 
@@ -64,8 +66,7 @@ func (b *BitSet) Get(i uint) bool {
 		return false
 	}
 	if b.swap {
-		v := swapUint64(b.vec[idx])
-		return v&(1<<(i&(wordBits-1))) != 0
+		return b.vec[idx]&(1<<(wordBits-(i&mask00111000)-8)<<(i&mask00000111)) != 0
 	} else {
 		return b.vec[idx]&(1<<(i&(wordBits-1))) != 0
 	}
@@ -78,9 +79,7 @@ func (b *BitSet) Set(i uint) bool {
 		return false
 	}
 	if b.swap {
-		v := swapUint64(b.vec[idx])
-		v |= 1 << (i & (wordBits - 1))
-		b.vec[idx] = swapUint64(v)
+		b.vec[idx] |= 1 << (wordBits - (i & mask00111000) - 8) << (i & mask00000111)
 	} else {
 		b.vec[idx] |= 1 << (i & (wordBits - 1))
 	}
@@ -94,9 +93,7 @@ func (b *BitSet) Unset(i uint) bool {
 		return false
 	}
 	if b.swap {
-		v := swapUint64(b.vec[idx])
-		v &^= 1 << (i & (wordBits - 1))
-		b.vec[idx] = swapUint64(v)
+		b.vec[idx] &^= 1 << (wordBits - (i & mask00111000) - 8) << (i & mask00000111)
 	} else {
 		b.vec[idx] &^= 1 << (i & (wordBits - 1))
 	}
