@@ -1,5 +1,7 @@
 # Bi-endianess Bit Vector
 
+[![Build Status](https://travis-ci.com/kawasin73/bitset.svg?branch=master)](https://travis-ci.com/kawasin73/bitset)
+
 bitset は、ビッグエンディアン、リトルエンディアンの両方に対応したビットベクトルのGo言語で実装されたライブラリです。
 
 マシンのエンディアンに関わらず初期化時に指定されたエンディアンでビットベクトルを構築することで、ファイルに保存したバイト列を異なるエンディアンのマシン上で利用することができます。

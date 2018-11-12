@@ -1,5 +1,7 @@
 # Bi-endianess Bit Vector
 
+[![Build Status](https://travis-ci.com/kawasin73/bitset.svg?branch=master)](https://travis-ci.com/kawasin73/bitset)
+
 bitset is Bit Vector (Array) library supporting both Little Endian and Big Endian for Golang.
 
 bitset write bit vector to byte array with specified endianness (Little Endian or Big Endian) regardless of host endianness.
