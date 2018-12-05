@@ -37,6 +37,7 @@ func swapUint64(n uint64) uint64 {
 // BitSet is bit vector component
 type BitSet struct {
 	vec  []uint64
+	orig []byte
 	swap bool
 }
 
@@ -55,6 +56,7 @@ func New(b []byte, endian Endianness) (*BitSet, error) {
 
 	return &BitSet{
 		vec:  *(*[]uint64)(unsafe.Pointer(&header)),
+		orig: b, // refrain GC
 		swap: endian != hostEndian,
 	}, nil
 }
