@@ -316,3 +316,24 @@ func TestBitVec_FindLastOne(t *testing.T) {
 		})
 	}
 }
+
+func TestBitSet_Count(t *testing.T) {
+	for _, endian := range endians {
+		t.Run(endian.String(), func(t *testing.T) {
+			buf := make([]byte, 8*3)
+			b, err := New(buf, endian)
+			if err != nil {
+				t.Fatalf("failed to create bit vec %v", err)
+			}
+			arr := []uint{0, 1, 3, 6, 10, 64, 127}
+			for _, v := range arr {
+				if !b.Set(v) {
+					t.Errorf("failed to set %v", v)
+				}
+			}
+			if b.Count() != uint(len(arr)) {
+				t.Errorf("count == %v, expected %v", b.Count(), len(arr))
+			}
+		})
+	}
+}

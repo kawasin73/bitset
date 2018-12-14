@@ -72,6 +72,7 @@ go get github.com/kawasin73/bitset
 - Length of the buffer (`[]byte`) provided by user MUST be a multiple of 8. (or `New()` returns error `bitset.ErrInvalidLength`)
 - bitset supports only `Little Endian` and `Big Endian`, not `middle endian` or other endianness.
 - bitset never auto expand provided buffer. If you need to expand bit vector then re-create `bitset.BitVec` with expanded buffer by user.
+- Supports Go Version `> 1.9`. using `math/bits` package.
 
 ## LICENSE
 

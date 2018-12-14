@@ -191,3 +191,12 @@ func (b *BitSet) FindLastOne() (uint, bool) {
 	}
 	return 0, false
 }
+
+// Count returns the number of set bit
+func (b *BitSet) Count() uint {
+	var cnt uint
+	for _, v := range b.vec {
+		cnt += uint(bits.OnesCount64(v))
+	}
+	return cnt
+}
