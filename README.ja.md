@@ -1,6 +1,7 @@
 # Bi-endianess Bit Vector
 
 [![Build Status](https://travis-ci.com/kawasin73/bitset.svg?branch=master)](https://travis-ci.com/kawasin73/bitset)
+[![GoDoc](https://godoc.org/github.com/kawasin73/bitset?status.svg)](https://godoc.org/github.com/kawasin73/bitset)
 
 bitset は、ビッグエンディアン、リトルエンディアンの両方に対応したビットベクトルのGo言語で実装されたライブラリです。
 
