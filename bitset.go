@@ -5,6 +5,7 @@ import (
 	"math/bits"
 	"reflect"
 	"unsafe"
+	"encoding/binary"
 )
 
 const (
@@ -42,12 +43,12 @@ type BitSet struct {
 }
 
 // New create *BitSet
-func New(b []byte, endian Endianness) (*BitSet, error) {
+func New(b []byte, order binary.ByteOrder) (*BitSet, error) {
 	if len(b)%8 != 0 {
 		return nil, ErrInvalidLength
-	} else if endian != LittleEndian && endian != BigEndian {
+	} else if order != binary.LittleEndian && order != binary.BigEndian {
 		return nil, ErrInvalidEndianness
-	} else if hostEndian != LittleEndian && hostEndian != BigEndian {
+	} else if hostEndian != binary.LittleEndian && hostEndian != binary.BigEndian {
 		return nil, ErrUnsupportedArch
 	}
 	header := *(*reflect.SliceHeader)(unsafe.Pointer(&b))
@@ -57,7 +58,7 @@ func New(b []byte, endian Endianness) (*BitSet, error) {
 	return &BitSet{
 		vec:  *(*[]uint64)(unsafe.Pointer(&header)),
 		orig: b, // refrain GC
-		swap: endian != hostEndian,
+		swap: order != hostEndian,
 	}, nil
 }
 

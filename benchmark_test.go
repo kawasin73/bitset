@@ -4,6 +4,7 @@ import (
 	"math/rand"
 	"testing"
 	"time"
+	"encoding/binary"
 )
 
 const randomSize = 1024 * 8
@@ -22,16 +23,16 @@ func init() {
 }
 
 func BenchmarkBitVec_Set_LittleEndian(b *testing.B) {
-	benchmarkBitVecSet(b, LittleEndian)
+	benchmarkBitVecSet(b, binary.LittleEndian)
 }
 
 func BenchmarkBitVec_Set_BigEndian(b *testing.B) {
-	benchmarkBitVecSet(b, BigEndian)
+	benchmarkBitVecSet(b, binary.BigEndian)
 }
 
-func benchmarkBitVecSet(b *testing.B, endian Endianness) {
+func benchmarkBitVecSet(b *testing.B, order binary.ByteOrder) {
 	buf := make([]byte, randomSize/8)
-	bv, err := New(buf, endian)
+	bv, err := New(buf, order)
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -41,16 +42,16 @@ func benchmarkBitVecSet(b *testing.B, endian Endianness) {
 }
 
 func BenchmarkBitVec_Unset_LittleEndian(b *testing.B) {
-	benchmarkBitVecUnset(b, LittleEndian)
+	benchmarkBitVecUnset(b, binary.LittleEndian)
 }
 
 func BenchmarkBitVec_Unset_BigEndian(b *testing.B) {
-	benchmarkBitVecUnset(b, BigEndian)
+	benchmarkBitVecUnset(b, binary.BigEndian)
 }
 
-func benchmarkBitVecUnset(b *testing.B, endian Endianness) {
+func benchmarkBitVecUnset(b *testing.B, order binary.ByteOrder) {
 	buf := make([]byte, randomSize/8)
-	bv, err := New(buf, endian)
+	bv, err := New(buf, order)
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -60,16 +61,16 @@ func benchmarkBitVecUnset(b *testing.B, endian Endianness) {
 }
 
 func BenchmarkBitVec_Get_LittleEndian(b *testing.B) {
-	benchmarkBitVecGet(b, LittleEndian)
+	benchmarkBitVecGet(b, binary.LittleEndian)
 }
 
 func BenchmarkBitVec_Get_BigEndian(b *testing.B) {
-	benchmarkBitVecGet(b, BigEndian)
+	benchmarkBitVecGet(b, binary.BigEndian)
 }
 
-func benchmarkBitVecGet(b *testing.B, endian Endianness) {
+func benchmarkBitVecGet(b *testing.B, order binary.ByteOrder) {
 	buf := make([]byte, randomSize/8)
-	bv, err := New(buf, endian)
+	bv, err := New(buf, order)
 	if err != nil {
 		b.Fatal(err)
 	}

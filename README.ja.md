@@ -22,7 +22,7 @@ bitset は、ビッグエンディアン、リトルエンディアンの両方�
 func main() {
 	// in memory usage
 	buf := make([]byte, 2*8)
-	b, _ := bitset.New(buf, bitset.LittleEndian)
+	b, _ := bitset.New(buf, binary.LittleEndian)
 	for _, v := range []uint{0, 1, 3, 6, 10, 64, 127, 128} {
 		b.Set(v) // when v == 128 returns false because overflow
 	}
@@ -48,7 +48,7 @@ func main() {
 		f.Close()
 	}()
 
-	b, _ = bitset.New(buf, bitset.BigEndian)
+	b, _ = bitset.New(buf, binary.BigEndian)
 	for v, ok := b.FindFirstOne(0); ok; v, ok = b.FindFirstOne(v + 1) {
 		fmt.Println(v) // 0 1 3 6 10 64  if executed twice
 	}

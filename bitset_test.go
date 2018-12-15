@@ -2,29 +2,29 @@ package bitset
 
 import (
 	"testing"
+	"encoding/binary"
 )
 
 var (
-	endians = []Endianness{LittleEndian, BigEndian}
+	endians = []binary.ByteOrder{binary.LittleEndian, binary.BigEndian}
 )
 
 func TestNew(t *testing.T) {
 	tests := map[string]struct {
-		size   int
-		endian Endianness
-		err    error
+		size  int
+		order binary.ByteOrder
+		err   error
 	}{
-		"should create length : 0":             {size: 0, endian: LittleEndian, err: nil},
-		"should create length : 1":             {size: 8, endian: LittleEndian, err: nil},
-		"should create length : 1024":          {size: 8 * 1024, endian: LittleEndian, err: nil},
-		"should be big endian":                 {size: 8 * 1024, endian: BigEndian, err: nil},
-		"length of buffer must be N * 8 bytes": {size: 100, endian: LittleEndian, err: ErrInvalidLength},
-		"unsupported endian unknown":           {size: 1024, endian: unknown, err: ErrInvalidEndianness},
-		"unsupported endian 100":               {size: 1024, endian: 100, err: ErrInvalidEndianness},
+		"should create length : 0":             {size: 0, order: binary.LittleEndian, err: nil},
+		"should create length : 1":             {size: 8, order: binary.LittleEndian, err: nil},
+		"should create length : 1024":          {size: 8 * 1024, order: binary.LittleEndian, err: nil},
+		"should be big endian":                 {size: 8 * 1024, order: binary.BigEndian, err: nil},
+		"length of buffer must be N * 8 bytes": {size: 100, order: binary.LittleEndian, err: ErrInvalidLength},
+		"unsupported endian nil":           {size: 1024, order: nil, err: ErrInvalidEndianness},
 	}
 
 	for name, v := range tests {
-		b, err := New(make([]byte, v.size), v.endian)
+		b, err := New(make([]byte, v.size), v.order)
 		if err != v.err {
 			t.Errorf("%v b : %v, err : %v, expected err : %v", name, b, err, v.err)
 		}
@@ -34,7 +34,7 @@ func TestNew(t *testing.T) {
 func TestBitVec_Set_Unset(t *testing.T) {
 	t.Run("set and unset in LittleEndian", func(t *testing.T) {
 		buf := make([]byte, 8*10)
-		b, err := New(buf, LittleEndian)
+		b, err := New(buf, binary.LittleEndian)
 		if err != nil {
 			t.Fatalf("failed to create bit vec %v", err)
 		}
@@ -73,7 +73,7 @@ func TestBitVec_Set_Unset(t *testing.T) {
 
 	t.Run("set and unset in BigEndian", func(t *testing.T) {
 		buf := make([]byte, 8*10)
-		b, err := New(buf, BigEndian)
+		b, err := New(buf, binary.BigEndian)
 		if err != nil {
 			t.Fatalf("failed to create bit vec %v", err)
 		}
