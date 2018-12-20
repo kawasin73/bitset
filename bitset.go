@@ -37,13 +37,14 @@ func swapUint64(n uint64) uint64 {
 
 // BitSet is bit vector component
 type BitSet struct {
-	vec  []uint64
-	orig []byte
-	swap bool
+	vec    []uint64
+	orig   []byte
+	swap   bool
+	extend bool
 }
 
 // New create *BitSet
-func New(b []byte, order binary.ByteOrder) (*BitSet, error) {
+func New(b []byte, order binary.ByteOrder, extend bool) (*BitSet, error) {
 	if len(b)%8 != 0 {
 		return nil, ErrInvalidLength
 	} else if order != binary.LittleEndian && order != binary.BigEndian {
@@ -56,9 +57,10 @@ func New(b []byte, order binary.ByteOrder) (*BitSet, error) {
 	header.Cap /= wordBytes
 
 	return &BitSet{
-		vec:  *(*[]uint64)(unsafe.Pointer(&header)),
-		orig: b, // refrain GC
-		swap: order != hostEndian,
+		vec:    *(*[]uint64)(unsafe.Pointer(&header)),
+		orig:   b, // refrain GC
+		swap:   order != hostEndian,
+		extend: extend,
 	}, nil
 }
 
@@ -75,11 +77,36 @@ func (b *BitSet) Get(i uint) bool {
 	}
 }
 
+func (c *BitSet) extendVec(size int) bool {
+	if len(c.vec) >= size {
+		// do nothing
+	} else if cap(c.vec) >= size {
+		c.vec = c.vec[:size]
+	} else {
+		nextcap := size + size
+		if size > 1024 {
+			nextcap = size + size/4
+		}
+		if nextcap <= 0 {
+			// overflow
+			return false
+		}
+		newvec := make([]uint64, size, nextcap)
+		copy(newvec, c.vec)
+		c.vec = newvec
+		// remove original reference to GC
+		c.orig = nil
+	}
+	return true
+}
+
 // Set sets 1 to bit
 func (b *BitSet) Set(i uint) bool {
 	idx := i >> log2WordSize
 	if int(idx) >= len(b.vec) {
-		return false
+		if !b.extend || !b.extendVec(int(idx +1)) {
+			return false
+		}
 	}
 	if b.swap {
 		b.vec[idx] |= 1 << (wordBits - (i & mask00111000) - 8) << (i & mask00000111)

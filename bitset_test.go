@@ -24,7 +24,7 @@ func TestNew(t *testing.T) {
 	}
 
 	for name, v := range tests {
-		b, err := New(make([]byte, v.size), v.order)
+		b, err := New(make([]byte, v.size), v.order, false)
 		if err != v.err {
 			t.Errorf("%v b : %v, err : %v, expected err : %v", name, b, err, v.err)
 		}
@@ -34,7 +34,7 @@ func TestNew(t *testing.T) {
 func TestBitVec_Set_Unset(t *testing.T) {
 	t.Run("set and unset in LittleEndian", func(t *testing.T) {
 		buf := make([]byte, 8*10)
-		b, err := New(buf, binary.LittleEndian)
+		b, err := New(buf, binary.LittleEndian, false)
 		if err != nil {
 			t.Fatalf("failed to create bit vec %v", err)
 		}
@@ -73,7 +73,7 @@ func TestBitVec_Set_Unset(t *testing.T) {
 
 	t.Run("set and unset in BigEndian", func(t *testing.T) {
 		buf := make([]byte, 8*10)
-		b, err := New(buf, binary.BigEndian)
+		b, err := New(buf, binary.BigEndian, false)
 		if err != nil {
 			t.Fatalf("failed to create bit vec %v", err)
 		}
@@ -111,24 +111,46 @@ func TestBitVec_Set_Unset(t *testing.T) {
 	})
 
 	for _, endian := range endians {
-		t.Run("vector edge "+endian.String(), func(t *testing.T) {
-			buf := make([]byte, 16)
-			b, err := New(buf, endian)
-			if err != nil {
-				t.Fatalf("failed to create bit vec %v", err)
-			}
-			if !b.Set(16*8 - 1) {
-				t.Errorf("failed to set last bit")
-			}
-			if b.Set(16 * 8) {
-				t.Errorf("invalid to success to set next to the last bit")
-			}
-			if !b.Unset(16*8 - 1) {
-				t.Errorf("failed to unset last bit")
-			}
-			if b.Unset(16 * 8) {
-				t.Errorf("invalid to success to unset next to the last bit")
-			}
+		t.Run(endian.String(), func(t *testing.T) {
+			t.Run("vector edge", func(t *testing.T) {
+				buf := make([]byte, 16)
+				b, err := New(buf, endian, false)
+				if err != nil {
+					t.Fatalf("failed to create bit vec %v", err)
+				}
+				if !b.Set(16*8 - 1) {
+					t.Errorf("failed to set last bit")
+				}
+				if b.Set(16 * 8) {
+					t.Errorf("invalid to success to set next to the last bit")
+				}
+				if !b.Unset(16*8 - 1) {
+					t.Errorf("failed to unset last bit")
+				}
+				if b.Unset(16 * 8) {
+					t.Errorf("invalid to success to unset next to the last bit")
+				}
+			})
+
+			t.Run("extend vector", func(t *testing.T) {
+				buf := make([]byte, 16)
+				b, err := New(buf, endian, true)
+				if err != nil {
+					t.Fatalf("failed to create bit vec %v", err)
+				}
+				if !b.Set(16*8) {
+					t.Errorf("failed to set next to the last bit")
+				}
+				if b.orig != nil {
+					t.Errorf("remains old vector in orig")
+				}
+				if !b.Get(16*8) {
+					t.Errorf("failed to get extended vector value")
+				}
+				if !b.Unset(16 * 8) {
+					t.Errorf("invalid to success to unset next to the last bit")
+				}
+			})
 		})
 	}
 
@@ -138,7 +160,7 @@ func TestBitVec_Get(t *testing.T) {
 	for _, endian := range endians {
 		t.Run(endian.String(), func(t *testing.T) {
 			buf := make([]byte, 8*3)
-			b, err := New(buf, endian)
+			b, err := New(buf, endian, false)
 			if err != nil {
 				t.Fatalf("failed to create bit vec %v", err)
 			}
@@ -167,7 +189,7 @@ func TestBitVec_FindFirstOne(t *testing.T) {
 		t.Run(endian.String(), func(t *testing.T) {
 			t.Run("success to find", func(t *testing.T) {
 				buf := make([]byte, 8*3)
-				b, err := New(buf, endian)
+				b, err := New(buf, endian, false)
 				if err != nil {
 					t.Fatalf("failed to create bit vec %v", err)
 				}
@@ -197,7 +219,7 @@ func TestBitVec_FindFirstOne(t *testing.T) {
 
 			t.Run("all bit is 0", func(t *testing.T) {
 				buf := make([]byte, 8*3)
-				b, err := New(buf, endian)
+				b, err := New(buf, endian, false)
 				if err != nil {
 					t.Fatalf("failed to create bit vec %v", err)
 				}
@@ -214,7 +236,7 @@ func TestBitVec_FindFirstZero(t *testing.T) {
 		t.Run(endian.String(), func(t *testing.T) {
 			t.Run("success to find", func(t *testing.T) {
 				buf := make([]byte, 8*3)
-				b, err := New(buf, endian)
+				b, err := New(buf, endian, false)
 				if err != nil {
 					t.Fatalf("failed to create bit vec %v", err)
 				}
@@ -249,7 +271,7 @@ func TestBitVec_FindFirstZero(t *testing.T) {
 
 			t.Run("all bit is 1", func(t *testing.T) {
 				buf := make([]byte, 8*3)
-				b, err := New(buf, endian)
+				b, err := New(buf, endian, false)
 				if err != nil {
 					t.Fatalf("failed to create bit vec %v", err)
 				}
@@ -271,7 +293,7 @@ func TestBitVec_FindLastOne(t *testing.T) {
 		t.Run(endian.String(), func(t *testing.T) {
 			t.Run("success to find", func(t *testing.T) {
 				buf := make([]byte, 8*3)
-				b, err := New(buf, endian)
+				b, err := New(buf, endian, false)
 				if err != nil {
 					t.Fatalf("failed to create bit vec %v", err)
 				}
@@ -321,7 +343,7 @@ func TestBitSet_Count(t *testing.T) {
 	for _, endian := range endians {
 		t.Run(endian.String(), func(t *testing.T) {
 			buf := make([]byte, 8*3)
-			b, err := New(buf, endian)
+			b, err := New(buf, endian, false)
 			if err != nil {
 				t.Fatalf("failed to create bit vec %v", err)
 			}

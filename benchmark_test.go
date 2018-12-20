@@ -32,7 +32,7 @@ func BenchmarkBitVec_Set_BigEndian(b *testing.B) {
 
 func benchmarkBitVecSet(b *testing.B, order binary.ByteOrder) {
 	buf := make([]byte, randomSize/8)
-	bv, err := New(buf, order)
+	bv, err := New(buf, order, false)
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -51,7 +51,7 @@ func BenchmarkBitVec_Unset_BigEndian(b *testing.B) {
 
 func benchmarkBitVecUnset(b *testing.B, order binary.ByteOrder) {
 	buf := make([]byte, randomSize/8)
-	bv, err := New(buf, order)
+	bv, err := New(buf, order, false)
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -70,7 +70,7 @@ func BenchmarkBitVec_Get_BigEndian(b *testing.B) {
 
 func benchmarkBitVecGet(b *testing.B, order binary.ByteOrder) {
 	buf := make([]byte, randomSize/8)
-	bv, err := New(buf, order)
+	bv, err := New(buf, order, false)
 	if err != nil {
 		b.Fatal(err)
 	}

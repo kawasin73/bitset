@@ -23,9 +23,9 @@ bitset は、ビッグエンディアン、リトルエンディアンの両方�
 func main() {
 	// in memory usage
 	buf := make([]byte, 2*8)
-	b, _ := bitset.New(buf, binary.LittleEndian)
+	b, _ := bitset.New(buf, binary.LittleEndian, true)
 	for _, v := range []uint{0, 1, 3, 6, 10, 64, 127, 128} {
-		b.Set(v) // when v == 128 returns false because overflow
+		b.Set(v) // when v == 128 auto extend vector and it returns true
 	}
 	fmt.Println(buf) // [75 4 0 0 0 0 0 0 1 0 0 0 0 0 0 128]
 
@@ -49,12 +49,12 @@ func main() {
 		f.Close()
 	}()
 
-	b, _ = bitset.New(buf, binary.BigEndian)
+	b, _ = bitset.New(buf, binary.BigEndian, false)
 	for v, ok := b.FindFirstOne(0); ok; v, ok = b.FindFirstOne(v + 1) {
 		fmt.Println(v) // 0 1 3 6 10 64  if executed twice
 	}
 	for _, v := range []uint{0, 1, 3, 6, 10, 64, 127, 128} {
-		b.Set(v) // when v == 128 returns false because overflow
+		b.Set(v) // when v == 128 returns false because overflow. not extend vector
 	}
 	fmt.Println(buf) // [0 0 0 0 0 0 4 75 128 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0 ....
 }
@@ -70,7 +70,7 @@ go get github.com/kawasin73/bitset
 
 - 初期化時に渡すバイト列の長さは、8 の倍数であることが要求されます。8 で割り切れない長さのバイト列で初期化された場合は `bitset.ErrInvalidLength` エラーを発生させます。
 - マシンのエンディアン・バイト列を操作するエンディアンは、それぞれビッグエンディアンとリトルエンディアンのみに対応しています。ミドルエンディアンなど他のエンディアンには対応していません。
-- サイズの自動拡張は行いません。バイト列に保存できるサイズを超えた場合は、新しいバイト列を確保して `bitset.BitVec` を作成しなおしてください。
+- `New()` の引数 `extend` に `false` を設定した時、サイズの自動拡張を行いません。バイト列に保存できるサイズを超えた場合は、新しいバイト列を確保して `bitset.BitVec` を作成しなおしてください。
 - Go 1.9 以上をサポートしています。内部で、`math/bits` パッケージを利用しているためです。
 
 ## ライセンス

@@ -25,9 +25,9 @@ bitset switches optimized bit vector operation (`Set`、`Unset`、`Get` etc...) 
 func main() {
 	// in memory usage
 	buf := make([]byte, 2*8)
-	b, _ := bitset.New(buf, binary.LittleEndian)
+	b, _ := bitset.New(buf, binary.LittleEndian, true)
 	for _, v := range []uint{0, 1, 3, 6, 10, 64, 127, 128} {
-		b.Set(v) // when v == 128 returns false because overflow
+		b.Set(v) // when v == 128, auto extend vector and it returns true
 	}
 	fmt.Println(buf) // [75 4 0 0 0 0 0 0 1 0 0 0 0 0 0 128]
 
@@ -51,12 +51,12 @@ func main() {
 		f.Close()
 	}()
 
-	b, _ = bitset.New(buf, binary.BigEndian)
+	b, _ = bitset.New(buf, binary.BigEndian, false)
 	for v, ok := b.FindFirstOne(0); ok; v, ok = b.FindFirstOne(v + 1) {
 		fmt.Println(v) // 0 1 3 6 10 64  if executed twice
 	}
 	for _, v := range []uint{0, 1, 3, 6, 10, 64, 127, 128} {
-		b.Set(v) // when v == 128 returns false because overflow
+		b.Set(v) // when v == 128, returns false because overflow. not extend vector
 	}
 	fmt.Println(buf) // [0 0 0 0 0 0 4 75 128 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0 ....
 }
@@ -72,7 +72,7 @@ go get github.com/kawasin73/bitset
 
 - Length of the buffer (`[]byte`) provided by user MUST be a multiple of 8. (or `New()` returns error `bitset.ErrInvalidLength`)
 - bitset supports only `Little Endian` and `Big Endian`, not `middle endian` or other endianness.
-- bitset never auto expand provided buffer. If you need to expand bit vector then re-create `bitset.BitVec` with expanded buffer by user.
+- bitset does not auto expand provided buffer if `extend` (`New()` 3rd argument) is `false`. If you need to expand bit vector then re-create `bitset.BitVec` with expanded buffer by user.
 - Supports Go Version `> 1.9`. using `math/bits` package.
 
 ## LICENSE
