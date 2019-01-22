@@ -264,8 +264,13 @@ func TestBitVec_FindFirstZero(t *testing.T) {
 					}
 					v = result + 1
 				}
-				if result, ok := b.FindFirstZero(v); ok {
-					t.Errorf("unexpectedly found value  v : %v, result : %v", v, result)
+				out := uint(8*3*8+10)
+				result, ok := b.FindFirstZero(out)
+				if ok {
+					t.Errorf("unexpectedly return ok")
+				}
+				if result != out {
+					t.Errorf("out range ffz must be return out value %v, expected %v", result, out)
 				}
 			})
 
@@ -280,8 +285,12 @@ func TestBitVec_FindFirstZero(t *testing.T) {
 						t.Errorf("failed to set %v", i)
 					}
 				}
-				if result, ok := b.FindFirstZero(0); ok {
+				result, ok := b.FindFirstZero(0)
+				if ok {
 					t.Errorf("unexpectedly found value result : %v", result)
+				}
+				if result != 8*3*8 {
+					t.Errorf("unexpectedly found value result : %v, expected %v", result, 8*3*8)
 				}
 			})
 		})

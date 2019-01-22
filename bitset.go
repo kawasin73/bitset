@@ -168,7 +168,7 @@ func (b *BitSet) FindFirstOne(i uint) (uint, bool) {
 func (b *BitSet) FindFirstZero(i uint) (uint, bool) {
 	idx := int(i >> log2WordSize)
 	if idx >= len(b.vec) {
-		return 0, false
+		return i, false
 	}
 	if b.swap {
 		offset := (i & (wordBits - 1))
@@ -195,7 +195,7 @@ func (b *BitSet) FindFirstZero(i uint) (uint, bool) {
 			}
 		}
 	}
-	return 0, false
+	return uint(idx)*wordBits, false
 }
 
 // FindLastOne returns last 1 bit index and true.
